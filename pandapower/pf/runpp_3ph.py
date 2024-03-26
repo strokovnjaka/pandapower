@@ -6,7 +6,7 @@
 from time import perf_counter
 import numpy as np
 
-from pandapower.auxiliary import _sum_by_group, _check_if_numba_is_installed,\
+from pandapower.auxiliary import _check_lightsim2grid_compatibility, _sum_by_group, _check_if_numba_is_installed,\
     _check_bus_index_and_print_warning_if_high,\
     _check_gen_index_and_print_warning_if_high, \
     _add_pf_options, _add_ppc_options, _clean_up, sequence_to_phase, \
@@ -145,6 +145,7 @@ def _load_mapping(net, ppci1):
 # 3 phase algorithm function
 # =============================================================================
 def runpp_3ph(net, calculate_voltage_angles=True, init="auto",
+              algorithm='nr', distributed_slack=False, tdpf=False, voltage_depend_loads=False, 
               max_iteration="auto", tolerance_mva=1e-8, trafo_model='t',
               trafo_loading="current", enforce_q_lims=False, numba=True,
               recycle=None, check_connectivity=True, switch_rx_ratio=2.0,
@@ -364,6 +365,15 @@ def runpp_3ph(net, calculate_voltage_angles=True, init="auto",
     if numba:
         numba = _check_if_numba_is_installed()
 
+    # similar to _init_runpp_options
+    lightsim2grid = kwargs.get("lightsim2grid", "auto")
+    voltage_depend_loads = overrule_options.get("voltage_depend_loads", voltage_depend_loads)
+    algorithm = overrule_options.get("algorithm", algorithm)
+    distributed_slack = overrule_options.get("distributed_slack", distributed_slack)
+    tdpf = overrule_options.get("tdpf", tdpf)
+    lightsim2grid = _check_lightsim2grid_compatibility(net, lightsim2grid, voltage_depend_loads, algorithm,
+                                                       distributed_slack, tdpf)
+
     ac = True
     mode = "pf_3ph"  # TODO: Make valid modes (pf, pf_3ph, se, etc.) available in seperate file (similar to idx_bus.py)
 #    v_debug = kwargs.get("v_debug", False)
@@ -403,7 +413,7 @@ def runpp_3ph(net, calculate_voltage_angles=True, init="auto",
     _add_pf_options(net, tolerance_mva=tolerance_mva, trafo_loading=trafo_loading,
                     numba=numba, ac=ac, algorithm="nr", max_iteration=max_iteration,
                     only_v_results=only_v_results, v_debug=v_debug, use_umfpack=use_umfpack,
-                    permc_spec=permc_spec, lightsim2grid=False)
+                    permc_spec=permc_spec, lightsim2grid=lightsim2grid)
     net._options.update(overrule_options)
     _check_bus_index_and_print_warning_if_high(net)
     _check_gen_index_and_print_warning_if_high(net)
