@@ -60,7 +60,7 @@ def test_contingency_timeseries(get_net):
         contingency_functions = [*contingency_functions, pp.contingency.run_contingency_ls2g]
 
     for contingency_function in contingency_functions:
-        net0 = get_net.deepcopy()
+        net0 = copy.deepcopy(get_net)
         setup_timeseries(net0)
         ow = net0.output_writer.object.at[0]
 
@@ -71,7 +71,7 @@ def test_contingency_timeseries(get_net):
         # check for the last time step:
         res1 = pp.contingency.run_contingency(net0, nminus1_cases,
                                               contingency_evaluation_function=run_for_from_bus_loading)
-        net1 = net0.deepcopy()
+        net1 = copy.deepcopy(net0)
 
         # check for the first time step:
         for c in net0.controller.object.values:
@@ -193,7 +193,7 @@ def test_lightsim2grid_distributed_slack():
     pp.replace_ext_grid_by_gen(net, slack=True, cols_to_keep=["slack_weight"])
     nminus1_cases = {"line": {"index": np.array([1, 2, 4, 5, 7, 8])}}
 
-    net1 = net.deepcopy()
+    net1 = copy.deepcopy(net)
     net1.gen.loc[~net1.gen.slack, 'slack_weight'] = 0
 
     res = pp.contingency.run_contingency(net, nminus1_cases, contingency_evaluation_function=run_for_from_bus_loading,
@@ -336,7 +336,7 @@ def check_cause_index(net, nminus1_cases):
     This is a not so efficient but very easy to understand auxiliary function to test the "cause element" feature
     that is otherwise complicated to test properly.
     """
-    net_copy = net.deepcopy()
+    net_copy = copy.deepcopy(net)
     elements_to_check = [e for e in ("line", "trafo") if len(net[e]) > 0]
     for check_element in elements_to_check:
         result_table = net_copy[f"res_{check_element}"]
@@ -406,7 +406,7 @@ def _randomize_indices(net):
 
 def test_reminder_bring_back_case118():
     from packaging.version import Version
-    if lightsim2grid_installed and Version(lightsim2grid.__version__) > Version("0.9.0"):
+    if lightsim2grid_installed and Version(lightsim2grid.__version__) > Version("0.10.0"):
         raise UserWarning("bring back case 118 and remove xfail for test_unequal_trafo_impedances and test_case118")
 
 

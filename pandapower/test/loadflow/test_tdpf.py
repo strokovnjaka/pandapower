@@ -3,7 +3,7 @@
 # Copyright (c) 2016-2024 by University of Kassel and Fraunhofer Institute for Energy Economics
 # and Energy System Technology (IEE), Kassel. All rights reserved.
 import os
-
+import copy
 import numpy as np
 import pytest
 
@@ -310,7 +310,7 @@ def test_default_parameters():
     net.line.x_ohm_per_km /= net.line.length_km
     net.line.r_ohm_per_km /= net.line.length_km
     net.line.c_nf_per_km /= net.line.length_km
-    net_backup = net.deepcopy()
+    net_backup = copy.deepcopy(net)
     pp.runpp(net_backup)
 
     # test error is raised when 'tdpf' column is missng
@@ -331,7 +331,7 @@ def test_default_parameters():
         pp.runpp(net, tdpf=True, tdpf_delay_s=120)
 
     # check for simplified method
-    net = net_backup.deepcopy()
+    net = copy.deepcopy(net_backup)
     net.line["tdpf"] = np.nan
     with pytest.raises(UserWarning, match="required columns .* are missing"):
         pp.runpp(net, tdpf=True, tdpf_update_r_theta=False)
@@ -351,13 +351,13 @@ def test_default_parameters():
     pp.runpp(net, tdpf=True, tdpf_update_r_theta=False)
 
     # now test with "normal" TDPF
-    net = net_backup.deepcopy()
+    net = copy.deepcopy(net_backup)
     net.line.loc[net.line.r_ohm_per_km != 0, "tdpf"] = True
     net.line["conductor_outer_diameter_m"] = 2.5e-2  # 2.5 cm?
     pp.runpp(net, tdpf=True)
     # here all the standard assumptions are filled
     # now we check that user-defined assumptions are preserved
-    net = net_backup.deepcopy()
+    net = copy.deepcopy(net_backup)
     net.line.loc[net.line.r_ohm_per_km != 0, "tdpf"] = True
     net.line["conductor_outer_diameter_m"] = 2.5e-2  # 2.5 cm?
     net.line.loc[[2, 4], 'temperature_degree_celsius'] = 40
@@ -374,7 +374,7 @@ def test_default_parameters():
 
 def test_with_user_pf_options():
     net = simple_test_grid(0.5, 0.5)
-    net2 = net.deepcopy()
+    net2 = copy.deepcopy(net)
     pp.set_user_pf_options(net, tdpf=True)
     pp.runpp(net)
     assert "r_ohm_per_km" in net.res_line

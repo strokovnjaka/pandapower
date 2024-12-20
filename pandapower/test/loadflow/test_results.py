@@ -7,6 +7,7 @@ import pandas as pd
 import pytest
 import numpy as np
 from numpy import isin, isnan, isclose, allclose
+import copy
 
 import pandapower as pp
 import pandapower.control
@@ -274,7 +275,7 @@ def test_tap_dependent_impedance(result_test_network):
     idx_vkr = characteristic_vkr.index
 
     # we use for reference
-    net0 = net.deepcopy()
+    net0 = copy.deepcopy(net)
 
     net.trafo["tap_dependent_impedance"] = pd.Series(index=net.trafo.index, dtype=bool, data=False)
     net.trafo.loc[0, 'tap_dependent_impedance'] = True

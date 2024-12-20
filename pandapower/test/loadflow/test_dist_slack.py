@@ -4,6 +4,7 @@
 # and Energy System Technology (IEE), Kassel. All rights reserved.
 
 
+import copy
 import numpy as np
 import pytest
 import pandapower as pp
@@ -142,7 +143,7 @@ def check_xward_results(net, tol=1e-9):
 
 def run_and_assert_numba(net, **kwargs):
     if numba_installed:
-        net_temp = net.deepcopy()
+        net_temp = copy.deepcopy(net)
         pp.runpp(net_temp, distributed_slack=True, numba=False, **kwargs)
         pp.runpp(net, distributed_slack=True, **kwargs)
         assert_res_equal(net, net_temp)
@@ -176,7 +177,7 @@ def test_small_example():
     # ext_grids are responsible to take the slack power
     net.gen["slack_weight"] = 1
 
-    net2 = net.deepcopy()
+    net2 = copy.deepcopy(net)
 
     pp.runpp(net, distributed_slack=True, numba=False)
 
@@ -450,7 +451,7 @@ def test_multivoltage_example_with_controller():
     expected_slack_power = load_disp + expected_losses - gen_disp  # MW
     tol = 0.5  # MW
 
-    net2 = net.deepcopy()
+    net2 = copy.deepcopy(net)
     # test distributed_slack
     run_and_assert_numba(net)
 
@@ -504,7 +505,7 @@ def test_dist_slack_user_pf_options():
     # ext_grids are responsible to take the slack power
     net.gen["slack_weight"] = 1
 
-    net2 = net.deepcopy()
+    net2 = copy.deepcopy(net)
 
     pp.runpp(net, distributed_slack=True)
 

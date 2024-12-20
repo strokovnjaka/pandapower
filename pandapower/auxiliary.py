@@ -31,7 +31,6 @@ from collections.abc import MutableMapping
 import warnings
 from importlib.metadata import version as version_str
 from importlib.metadata import PackageNotFoundError
-from typing_extensions import deprecated
 
 from geojson import loads, GeoJSON
 import numpy as np
@@ -318,10 +317,6 @@ class pandapowerNet(ADict):
                 self[key] = pd.DataFrame(np.zeros(0, dtype=self[key]), index=pd.Index([],
                                          dtype=np.int64))
 
-    @deprecated("Use copy.deepcopy(net) instead of net.deepcopy()")
-    def deepcopy(self):
-        return copy.deepcopy(self)
-
     def __repr__(self):  # pragma: no cover
         """
         See Also
@@ -451,7 +446,7 @@ def element_types_to_ets(element_types=None):
     ser2 = pd.Series(ser1.index, index=list(ser1))
     if element_types is None:
         return ser2
-    elif isinstance(ets, str):
+    elif isinstance(element_types, str):
         return ser2.at[element_types]
     else:
         return list(ser2.loc[element_types])

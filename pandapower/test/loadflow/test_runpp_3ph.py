@@ -7,6 +7,7 @@ Tests 3 phase power flow algorithm
 import pandapower as pp
 import numpy as np
 import pytest
+import copy
 
 import pandapower.toolbox
 from pandapower.test.loadflow.PF_Results import get_PF_Results
@@ -535,7 +536,7 @@ def test_3ph_with_impedance():
     net.line.g_nf_per_km = 0.
     net.line["c0_nf_per_km"] = 0.
     net.line["g0_us_per_km"] = 0.
-    net_imp = net.deepcopy()
+    net_imp = copy.deepcopy(net)
     pp.replace_line_by_impedance(net_imp, net.line.index, 100)
     pp.runpp_3ph(net)
     pp.runpp_3ph(net_imp)
